@@ -1,6 +1,7 @@
 import http from 'node:http';
 import {getDataFromDB} from './database/db.js';
 import {errors} from './errors/error.js'
+import {sendJSONResponse} from "./util/sendJSONResponse.js";
 
 const PORT = 3000;
 
@@ -18,12 +19,15 @@ http
             const filteredDestinations = destinations.filter(destination => {
                 return destination.continent.toLowerCase() === continent
             })
-            res.setHeader('Content-Type', 'application/json')
-            res.statusCode = 200;
-            res.end(JSON.stringify(filteredDestinations))
+            sendJSONResponse(res, 200, filteredDestinations)
+        } else if (req.url.startsWith('/api/country') && req.method === 'GET') {
+            const country = req.url.split('/').pop().toLowerCase()
+            const filteredDestinations = destinations.filter(destination => {
+                return destination.country.toLowerCase() === country
+            })
+            sendJSONResponse(res, 200, filteredDestinations)
         } else {
-            res.statusCode = errors.notFound.statusCode;
-            res.end(errors.notFound.message)
+            sendJSONResponse(res, errors.notFound.statusCode, errors.notFound)
         }
     })
     .listen(PORT, () => {

@@ -9,12 +9,14 @@ const PORT = 3000;
 http
     .createServer(async (req, res) => {
 
+        const urlObj = new URL(req.url, `http://${req.headers.host}`)
+        const queryParams = Object.fromEntries(urlObj.searchParams.entries())
+
         const destinations = await getDataFromDB()
 
-        if (req.url === '/api' && req.method === 'GET') {
-            res.setHeader('Content-Type', 'application/json')
-            res.statusCode = 200;
-            res.end(JSON.stringify(destinations))
+        if (urlObj.pathname === '/api' && req.method === 'GET') {
+            let filteredDestinations = destinations
+            sendJSONResponse(res, 200, destinations)
         } else if (req.url.startsWith('/api/continents') && req.method === 'GET') {
             const continent = req.url.split('/').pop().toLowerCase()
             const filteredDestinations = getDataByPathParams(destinations, 'continent', continent)

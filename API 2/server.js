@@ -1,16 +1,22 @@
-import http from 'node:http';
+import http from 'node:http'
+import {serveStatic} from './utils/serveStatic.js'
+import {handleGet} from './handlers/routeHandlers.js'
 
-const PORT = 8000;
+const PORT = 8000
+
+const __dirname = import.meta.dirname
 
 http
-    .createServer((request, response) => {
-        //response.statusCode = 200
-        //response.setHeader('Content-Type', 'text/html')
-        //New way of doing it
-        response.writeHead(
-            200,
-            {'Content-Type': 'text/html'})
-        response.end(`<html><h1>Hello World</h1></html>`)
+    .createServer(async (req, res) => {
+
+        if (req.url === '/api') {
+            if (req.method === 'GET') {
+                return await handleGet(res)
+            }
+
+        } else if (!req.url.startsWith('/api')) {
+            return await serveStatic(req, res, __dirname)
+        }
     })
     .listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`)
